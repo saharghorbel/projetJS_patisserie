@@ -610,10 +610,10 @@ function initEventListeners() {
   document.getElementById('orderFormModalOverlay').addEventListener('click', (e) => {
     if (e.target.id === 'orderFormModalOverlay') closeOrderFormModal();
   });
-  });artModal();
-      closeOrderFormModal();
-    }
-  });f (orderForm) {
+  
+  // Order form submission
+  const orderForm = document.getElementById('orderForm');
+  if (orderForm) {
     orderForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       
