@@ -61,33 +61,6 @@
     </div>
   </section>
 
-  <div class="modal-overlay" id="modalOverlay">
-    <div class="modal" id="contactModal">
-      <button class="modal-close" id="modalCloseBtn">&times;</button>
-      <h2 class="modal-title">Contactez-Nous</h2>
-      <p class="modal-subtitle">Nous répondons sous 24h</p>
-      <form class="contact-form" id="contactForm">
-        <div class="form-group">
-          <label for="formName">Nom complet</label>
-          <input type="text" id="formName" name="name" required>
-        </div>
-        <div class="form-group">
-          <label for="formEmail">Email</label>
-          <input type="email" id="formEmail" name="email" required>
-        </div>
-        <div class="form-group">
-          <label for="formMessage">Message</label>
-          <textarea id="formMessage" name="message" rows="5" required></textarea>
-        </div>
-        <button type="submit" class="btn-submit">Envoyer</button>
-      </form>
-      <div class="success-message" id="successMessage">
-        <span class="check-icon">&#10003;</span> Message envoyé avec succès !
-      </div>
-      <div class="error-message-modal" id="errorMessage"></div>
-    </div>
-  </div>
-
   <!-- Modal Panier -->
   <div class="modal-overlay" id="cartModalOverlay">
     <div class="modal" id="cartModal">
@@ -156,7 +129,7 @@
         <ul class="footer-links">
           <li><a href="#gallery">Nos Créations</a></li>
           <li><a href="#about">À Propos</a></li>
-          <li><button class="btn-link" id="footerContactBtn">Contact</button></li>
+          
         </ul>
       </div>
       <div class="footer-section">
@@ -165,9 +138,7 @@
         <p style="margin-top: 1rem; color: #f4a261; font-weight: 600;">Merci de passer votre commande avant <strong>24h minimum</strong></p>
       </div>
     </div>
-    <div class="footer-bottom">
-      <p>&copy; 2026 Pâtisserie Vitrine. Tous droits r&eacute;serv&eacute;s.</p>
-    </div>
+   
   </footer>
 
   <script src="app.js"></script>

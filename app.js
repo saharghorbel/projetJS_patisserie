@@ -252,15 +252,6 @@ function attachCartControlListeners() {
 // MODAL MANAGEMENT
 // ════════════════════════════════════════
 
-// Contact modal
-function openContactModal() {
-  document.getElementById('modalOverlay').classList.add('open');
-}
-
-function closeContactModal() {
-  document.getElementById('modalOverlay').classList.remove('open');
-}
-
 // Cart modal
 function openCartModal() {
   renderCartItems();
@@ -599,19 +590,6 @@ function initEventListeners() {
     }
   });
   
-  // Contact modal buttons
-  const navContactBtn = document.getElementById('navContactBtn');
-  if (navContactBtn) navContactBtn.addEventListener('click', openContactModal);
-  
-  const heroContactBtn = document.getElementById('heroContactBtn');
-  if (heroContactBtn) heroContactBtn.addEventListener('click', openContactModal);
-  
-  const footerContactBtn = document.getElementById('footerContactBtn');
-  if (footerContactBtn) footerContactBtn.addEventListener('click', openContactModal);
-  
-  const modalCloseBtn = document.getElementById('modalCloseBtn');
-  if (modalCloseBtn) modalCloseBtn.addEventListener('click', closeContactModal);
-  
   // Cart badge - open cart modal
   document.getElementById('cartCount').parentElement.addEventListener('click', openCartModal);
   
@@ -625,10 +603,6 @@ function initEventListeners() {
   document.getElementById('orderFormModalCloseBtn').addEventListener('click', closeOrderFormModal);
   
   // Close modals on overlay click
-  document.getElementById('modalOverlay').addEventListener('click', (e) => {
-    if (e.target.id === 'modalOverlay') closeContactModal();
-  });
-  
   document.getElementById('cartModalOverlay').addEventListener('click', (e) => {
     if (e.target.id === 'cartModalOverlay') closeCartModal();
   });
@@ -636,70 +610,10 @@ function initEventListeners() {
   document.getElementById('orderFormModalOverlay').addEventListener('click', (e) => {
     if (e.target.id === 'orderFormModalOverlay') closeOrderFormModal();
   });
-  
-  // Close modals on Escape key
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      closeContactModal();
-      closeCartModal();
+  });artModal();
       closeOrderFormModal();
     }
-  });
-  
-  // Contact form submission
-  const contactForm = document.getElementById('contactForm');
-  if (contactForm) {
-    contactForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      const name = document.getElementById('formName').value.trim();
-      const email = document.getElementById('formEmail').value.trim();
-      const message = document.getElementById('formMessage').value.trim();
-      
-      if (!name || !email || !message) {
-        alert('Veuillez remplir tous les champs');
-        return;
-      }
-      
-      const submitBtn = contactForm.querySelector('.btn-submit');
-      const originalText = submitBtn.textContent;
-      const successMsg = document.getElementById('successMessage');
-      const errorMsg = document.getElementById('errorMessage');
-      
-      submitBtn.disabled = true;
-      submitBtn.textContent = 'Envoi en cours…';
-      errorMsg.classList.remove('show');
-      
-      const payload = {
-        name,
-        email,
-        message,
-        timestamp: new Date().toISOString()
-      };
-      
-      try {
-        await submitFormAJAX(payload);
-        successMsg.classList.add('show');
-        contactForm.reset();
-        
-        setTimeout(() => {
-          successMsg.classList.remove('show');
-          closeContactModal();
-          submitBtn.disabled = false;
-          submitBtn.textContent = originalText;
-        }, 2500);
-        
-      } catch (error) {
-        errorMsg.innerHTML = `<span style="font-size: 1.2rem; margin-right: 0.3rem;">&#10060;</span> Erreur: ${error.message}`;
-        submitBtn.disabled = false;
-        submitBtn.textContent = originalText;
-      }
-    });
-  }
-  
-  // Order form submission
-  const orderForm = document.getElementById('orderForm');
-  if (orderForm) {
+  });f (orderForm) {
     orderForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       
