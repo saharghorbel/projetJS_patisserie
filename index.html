@@ -16,31 +16,26 @@
       <ul class="nav-links">
         <li><a href="#gallery">Nos Créations</a></li>
         <li><a href="#about">À Propos</a></li>
-        <li><button class="btn-contact" id="navContactBtn">Contact</button></li>
+        <li><a href="#footer" class="btn-contact" id="navContactBtn">Contact</a></li>
       </ul>
       <div class="favorites-badge">
         <span class="heart-icon">♥</span>
         <span class="favorites-count" id="favoritesCount">0</span>
+      </div>
+      <div class="cart-badge">
+        <span class="cart-icon">🛒</span>
+        <span class="cart-count" id="cartCount">0</span>
       </div>
     </div>
   </nav>
 
   <header class="hero">
     <div class="container hero-content">
-      <h1 class="hero-title">L'Art de la Pâtisserie Tunisienne</h1>
-      <p class="hero-subtitle">Créations artisanales depuis 1987</p>
-      <p class="hero-location"><span class="location-icon">&#9906;</span> Avenue Habib Bourguiba, Tunis</p>
-      <button class="btn-primary" id="heroContactBtn">Passer Commande</button>
+      <h1 class="hero-title">sweet-bites</h1>
+      <p class="hero-subtitle"> Le coup de foudre dès la première bouchée</p>
+      <p class="hero-location"><span class="location-icon">&#9906</span> Sfax, Tunisie </p>
     </div>
   </header>
-
-  <section class="specials-banner" id="specials">
-    <div class="container">
-      <div class="specials-content" id="specialsContent">
-        <div class="loading-spinner-small"></div>
-      </div>
-    </div>
-  </section>
 
   <section class="gallery" id="gallery">
     <div class="container">
@@ -48,7 +43,7 @@
         <button class="filter-btn active" data-category="All">Tout</button>
         <button class="filter-btn" data-category="Sucré">Sucrés</button>
         <button class="filter-btn" data-category="Salé">Salés</button>
-        <button class="filter-btn" data-category="Gâteau">Gâteaux</button>
+       
       </div>
       <div class="taste-filter-bar" id="tasteFilterBar" style="display: none;">
         <!-- Taste filters will be dynamically inserted here -->
@@ -61,18 +56,8 @@
 
   <section class="about" id="about">
     <div class="container about-content">
-      <div class="stat-item">
-        <div class="stat-number">35+</div>
-        <div class="stat-label">Années d'Excellence</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-number">100%</div>
-        <div class="stat-label">Fait Maison</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-number">50+</div>
-        <div class="stat-label">Créations Uniques</div>
-      </div>
+      <h2>100% Fait Maison</h2>
+      <p>Découvrez nos délicieuses pâtisseries artisanales, confectionnées avec passion et des ingrédients de qualité. Chaque création est une célébration du savoir-faire tunisien.</p>
     </div>
   </section>
 
@@ -103,12 +88,63 @@
     </div>
   </div>
 
-  <footer class="footer">
+  <!-- Modal Panier -->
+  <div class="modal-overlay" id="cartModalOverlay">
+    <div class="modal" id="cartModal">
+      <button class="modal-close" id="cartModalCloseBtn">&times;</button>
+      <h2 class="modal-title">Mon Panier</h2>
+      <div class="cart-items-container" id="cartItemsContainer">
+        <p class="empty-cart-message">Votre panier est vide</p>
+      </div>
+      <div class="cart-total" id="cartTotal" style="display: none;">
+        <strong>Total: <span id="cartTotalPrice">0</span> TND</strong>
+      </div>
+      <button class="btn-order-submit" id="proceedOrderBtn" style="display: none;">Procéder à la commande</button>
+    </div>
+  </div>
+
+  <!-- Modal Formulaire de Commande -->
+  <div class="modal-overlay" id="orderFormModalOverlay">
+    <div class="modal" id="orderFormModal">
+      <button class="modal-close" id="orderFormModalCloseBtn">&times;</button>
+      <h2 class="modal-title">Formulaire de Commande</h2>
+      <p class="modal-subtitle">Veuillez compléter vos informations</p>
+      <form class="order-form" id="orderForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="orderFirstname">Prénom</label>
+            <input type="text" id="orderFirstname" name="firstname" required>
+          </div>
+          <div class="form-group">
+            <label for="orderLastname">Nom</label>
+            <input type="text" id="orderLastname" name="lastname" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="orderDate">Date de livraison</label>
+            <input type="date" id="orderDate" name="date" required>
+          </div>
+          <div class="form-group">
+            <label for="orderPhone">Téléphone</label>
+            <input type="tel" id="orderPhone" name="phone" pattern="[0-9+\s()-]*" required>
+          </div>
+        </div>
+        <button type="submit" class="btn-submit">Confirmer la commande</button>
+      </form>
+      <div class="success-message" id="orderSuccessMessage">
+        <span class="check-icon">&#10003;</span> Commande confirmée avec succès !
+      </div>
+      <div class="error-message-modal" id="orderErrorMessage"></div>
+    </div>
+  </div>
+
+  <footer class="footer" id="footer">
     <div class="container footer-content">
       <div class="footer-section">
-        <h3>Pâtisserie Vitrine</h3>
-        <p>Avenue Habib Bourguiba<br>1000 Tunis, Tunisie</p>
-        <p><span class="phone-icon">&#9742;</span> +216 71 123 456</p>
+        <h3> Sweet-bites</h3>
+        <p>Sfax</p>
+        <p><span class="phone-icon">&#9742;</span> +216 26057573</p>
       </div>
       <div class="footer-section">
         <h3>Horaires</h3>
@@ -122,6 +158,11 @@
           <li><a href="#about">À Propos</a></li>
           <li><button class="btn-link" id="footerContactBtn">Contact</button></li>
         </ul>
+      </div>
+      <div class="footer-section">
+        <h3>Livraison & Commande</h3>
+        <p>🚚 <strong>Livraison à domicile</strong></p>
+        <p style="margin-top: 1rem; color: #f4a261; font-weight: 600;">Merci de passer votre commande avant <strong>24h minimum</strong></p>
       </div>
     </div>
     <div class="footer-bottom">

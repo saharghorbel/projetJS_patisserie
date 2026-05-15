@@ -86,19 +86,14 @@ h1, h2, h3 {
 }
 
 .btn-contact {
-  background-color: var(--gold);
-  color: white;
-  border: none;
-  padding: 0.6rem 1.5rem;
-  border-radius: var(--radius);
-  cursor: pointer;
-  font-weight: 600;
-  transition: transform var(--transition), box-shadow var(--transition);
+  text-decoration: none;
+  color: var(--muted);
+  font-weight: 400;
+  transition: color var(--transition);
 }
 
 .btn-contact:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(212, 165, 116, 0.3);
+  color: var(--gold);
 }
 
 .favorites-badge {
@@ -458,6 +453,31 @@ h1, h2, h3 {
   background-color: var(--gold);
 }
 
+.btn-add-cart {
+  background-color: var(--gold);
+  color: white;
+  border: none;
+  padding: 0.7rem 1.5rem;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.95rem;
+  transition: all var(--transition);
+  box-shadow: 0 2px 8px rgba(212, 165, 116, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-add-cart:hover {
+  background-color: var(--espresso);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(212, 165, 116, 0.4);
+}
+
+.btn-add-cart:active {
+  transform: translateY(0);
+}
+
 /* ════════════════════════════════════════
    LOADING & EMPTY STATE
    ════════════════════════════════════════ */
@@ -748,6 +768,170 @@ h1, h2, h3 {
 }
 
 /* ════════════════════════════════════════
+   CART BADGE & MODAL
+   ════════════════════════════════════════ */
+.cart-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: var(--gold);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.cart-badge:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(212, 165, 116, 0.3);
+}
+
+.cart-icon {
+  font-size: 1.2rem;
+}
+
+.cart-items-container {
+  max-height: 400px;
+  overflow-y: auto;
+  margin-bottom: 1rem;
+}
+
+.empty-cart-message {
+  color: var(--muted);
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.1rem;
+}
+
+.cart-item {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.cart-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.cart-item-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--espresso);
+}
+
+.cart-item-price {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.cart-item-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.qty-btn-minus,
+.qty-btn-plus {
+  background-color: var(--border);
+  border: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color var(--transition);
+}
+
+.qty-btn-minus:hover,
+.qty-btn-plus:hover {
+  background-color: var(--gold);
+  color: white;
+}
+
+.qty-input {
+  width: 50px;
+  text-align: center;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.4rem;
+}
+
+.btn-remove-cart {
+  background-color: #fee;
+  border: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--heart-red);
+  font-weight: bold;
+  transition: background-color var(--transition);
+}
+
+.btn-remove-cart:hover {
+  background-color: var(--heart-red);
+  color: white;
+}
+
+.cart-item-total {
+  font-weight: 600;
+  color: var(--gold);
+  white-space: nowrap;
+}
+
+.cart-total {
+  padding: 1rem;
+  background-color: #f9f9f9;
+  border-radius: var(--radius);
+  text-align: right;
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+.btn-order-submit {
+  background-color: var(--gold);
+  color: white;
+  border: none;
+  padding: 1rem;
+  border-radius: var(--radius);
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color var(--transition);
+  width: 100%;
+}
+
+.btn-order-submit:hover {
+  background-color: var(--espresso);
+}
+
+/* ════════════════════════════════════════
+   ORDER FORM MODAL
+   ════════════════════════════════════════ */
+.order-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.form-row .form-group {
+  margin: 0;
+}
+
+/* ════════════════════════════════════════
    RESPONSIVE
    ════════════════════════════════════════ */
 @media (max-width: 900px) {
@@ -798,6 +982,20 @@ h1, h2, h3 {
     width: 100%;
     max-width: 300px;
   }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .cart-item {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  
+  .cart-item-controls {
+    justify-content: space-between;
+  }
+
   
   .filter-bar {
     gap: 0.5rem;

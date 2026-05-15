@@ -6,28 +6,73 @@ let activeFilter = 'All';
 let activeTaste = 'All';
 
 // ════════════════════════════════════════
-// LOCALSTORAGE FAVORITES
+// INDEXEDDB - FAVORITES MANAGEMENT
 // ════════════════════════════════════════
 
-// Get favorites array from localStorage
-function getFavorites() {
-  const stored = localStorage.getItem('patisserie_favorites');
-  return stored ? JSON.parse(stored) : [];
+// Initialize IndexedDB
+const dbName = 'PatisseriDB';
+const storeName = 'favorites';
+
+let db = null;
+
+async function initIndexedDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(dbName, 1);
+    
+    request.onerror = () => {
+      reject(request.error);
+    };
+    
+    request.onsuccess = () => {
+      db = request.result;
+      resolve(db);
+    };
+    
+    request.onupgradeneeded = (event) => {
+      const database = event.target.result;
+      if (!database.objectStoreNames.contains(storeName)) {
+        database.createObjectStore(storeName);
+      }
+    };
+  });
 }
 
-// Save favorites array to localStorage
-function saveFavorites(arr) {
-  localStorage.setItem('patisserie_favorites', JSON.stringify(arr));
+// Get all favorites from IndexedDB
+async function getFavorites() {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(storeName, 'readonly');
+    const store = transaction.objectStore(storeName);
+    const request = store.get('favoritesList');
+    
+    request.onsuccess = () => {
+      resolve(request.result?.value || []);
+    };
+    
+    request.onerror = () => reject(request.error);
+  });
+}
+
+// Save favorites to IndexedDB
+async function saveFavorites(arr) {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(storeName, 'readwrite');
+    const store = transaction.objectStore(storeName);
+    const request = store.put({ value: arr }, 'favoritesList');
+    
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+  });
 }
 
 // Check if a product ID is favorited
-function isFavorited(id) {
-  return getFavorites().includes(id);
+async function isFavorited(id) {
+  const favorites = await getFavorites();
+  return favorites.includes(id);
 }
 
-// Toggle favorite status for a product ID
-function toggleFavorite(id) {
-  const favorites = getFavorites();
+// Toggle favorite status for a product ID (IndexedDB)
+async function toggleFavorite(id) {
+  const favorites = await getFavorites();
   const index = favorites.indexOf(id);
   
   if (index > -1) {
@@ -36,15 +81,204 @@ function toggleFavorite(id) {
     favorites.push(id);
   }
   
-  saveFavorites(favorites);
-  updateFavoritesCounter();
-  return !isFavorited(id);
+  await saveFavorites(favorites);
+  await updateFavoritesCounter();
 }
 
 // Update the favorites counter badge in navbar
-function updateFavoritesCounter() {
-  const count = getFavorites().length;
-  document.getElementById('favoritesCount').textContent = count;
+async function updateFavoritesCounter() {
+  const favorites = await getFavorites();
+  document.getElementById('favoritesCount').textContent = favorites.length;
+}
+
+// ════════════════════════════════════════
+// SESSIONSTORAGE - CART MANAGEMENT
+// ════════════════════════════════════════
+
+// Get cart items from sessionStorage
+function getCartItems() {
+  const stored = sessionStorage.getItem('patisserie_cart');
+  return stored ? JSON.parse(stored) : [];
+}
+
+// Save cart items to sessionStorage
+function saveCartItems(cart) {
+  sessionStorage.setItem('patisserie_cart', JSON.stringify(cart));
+}
+
+// Add product to cart (sessionStorage)
+function addToCart(productId, productName, productPrice) {
+  const cart = getCartItems();
+  const existingItem = cart.find(item => item.productId === productId);
+  
+  if (existingItem) {
+    existingItem.quantity += 1;
+  } else {
+    cart.push({
+      productId,
+      productName,
+      productPrice,
+      quantity: 1
+    });
+  }
+  
+  saveCartItems(cart);
+  updateCartCounter();
+}
+
+// Remove product from cart
+function removeFromCart(productId) {
+  let cart = getCartItems();
+  cart = cart.filter(item => item.productId !== productId);
+  saveCartItems(cart);
+  updateCartCounter();
+  renderCartItems();
+}
+
+// Update product quantity in cart
+function updateCartQuantity(productId, quantity) {
+  const cart = getCartItems();
+  const item = cart.find(item => item.productId === productId);
+  
+  if (item) {
+    if (quantity <= 0) {
+      removeFromCart(productId);
+    } else {
+      item.quantity = quantity;
+      saveCartItems(cart);
+      updateCartCounter();
+      renderCartItems();
+    }
+  }
+}
+
+// Clear cart
+function clearCart() {
+  sessionStorage.removeItem('patisserie_cart');
+  updateCartCounter();
+  renderCartItems();
+}
+
+// Update cart counter badge
+function updateCartCounter() {
+  const cart = getCartItems();
+  const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+  document.getElementById('cartCount').textContent = totalItems;
+}
+
+// Calculate total cart price
+function getCartTotal() {
+  const cart = getCartItems();
+  return cart.reduce((total, item) => total + (item.productPrice * item.quantity), 0);
+}
+
+// ════════════════════════════════════════
+// CART UI MANAGEMENT
+// ════════════════════════════════════════
+
+// Render cart items in modal
+function renderCartItems() {
+  const container = document.getElementById('cartItemsContainer');
+  const cart = getCartItems();
+  
+  if (cart.length === 0) {
+    container.innerHTML = '<p class="empty-cart-message">Votre panier est vide</p>';
+    document.getElementById('cartTotal').style.display = 'none';
+    document.getElementById('proceedOrderBtn').style.display = 'none';
+    return;
+  }
+  
+  const cartHTML = cart.map(item => `
+    <div class="cart-item">
+      <div class="cart-item-info">
+        <h4 class="cart-item-name">${item.productName}</h4>
+        <span class="cart-item-price">${item.productPrice.toFixed(2)} TND</span>
+      </div>
+      <div class="cart-item-controls">
+        <button class="qty-btn-minus" data-id="${item.productId}">−</button>
+        <input type="number" class="qty-input" value="${item.quantity}" min="1" data-id="${item.productId}" readonly>
+        <button class="qty-btn-plus" data-id="${item.productId}">+</button>
+        <button class="btn-remove-cart" data-id="${item.productId}">✕</button>
+      </div>
+      <div class="cart-item-total">
+        ${(item.productPrice * item.quantity).toFixed(2)} TND
+      </div>
+    </div>
+  `).join('');
+  
+  container.innerHTML = cartHTML;
+  
+  // Show total and proceed button
+  const total = getCartTotal();
+  document.getElementById('cartTotalPrice').textContent = total.toFixed(2);
+  document.getElementById('cartTotal').style.display = 'block';
+  document.getElementById('proceedOrderBtn').style.display = 'block';
+  
+  // Attach event listeners to cart controls
+  attachCartControlListeners();
+}
+
+// Attach event listeners to cart item controls
+function attachCartControlListeners() {
+  // Remove buttons
+  document.querySelectorAll('.btn-remove-cart').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const productId = parseInt(e.target.getAttribute('data-id'));
+      removeFromCart(productId);
+    });
+  });
+  
+  // Plus/Minus buttons
+  document.querySelectorAll('.qty-btn-plus').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const productId = parseInt(e.target.getAttribute('data-id'));
+      const cart = getCartItems();
+      const item = cart.find(it => it.productId === productId);
+      if (item) updateCartQuantity(productId, item.quantity + 1);
+    });
+  });
+  
+  document.querySelectorAll('.qty-btn-minus').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const productId = parseInt(e.target.getAttribute('data-id'));
+      const cart = getCartItems();
+      const item = cart.find(it => it.productId === productId);
+      if (item) updateCartQuantity(productId, item.quantity - 1);
+    });
+  });
+}
+
+// ════════════════════════════════════════
+// MODAL MANAGEMENT
+// ════════════════════════════════════════
+
+// Contact modal
+function openContactModal() {
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeContactModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+
+// Cart modal
+function openCartModal() {
+  renderCartItems();
+  document.getElementById('cartModalOverlay').classList.add('open');
+}
+
+function closeCartModal() {
+  document.getElementById('cartModalOverlay').classList.remove('open');
+}
+
+// Order form modal
+function openOrderFormModal() {
+  closeCartModal();
+  document.getElementById('orderFormModalOverlay').classList.add('open');
+}
+
+function closeOrderFormModal() {
+  document.getElementById('orderFormModalOverlay').classList.remove('open');
 }
 
 // ════════════════════════════════════════
@@ -52,13 +286,13 @@ function updateFavoritesCounter() {
 // ════════════════════════════════════════
 
 // Create a single product card element
-function createCard(product) {
+async function createCard(product) {
   const article = document.createElement('article');
   article.className = 'product-card';
   article.setAttribute('data-id', product.id);
   article.setAttribute('data-category', product.category);
 
-  const favorited = isFavorited(product.id);
+  const favorited = await isFavorited(product.id);
   const heartIcon = favorited ? '♥' : '♡';
   const favoritedClass = favorited ? 'favorited' : '';
   
@@ -73,7 +307,7 @@ function createCard(product) {
         <span class="card-price">${product.price.toFixed(2)} TND</span>
         <div class="card-actions">
           <button class="btn-favorite ${favoritedClass}" data-id="${product.id}">${heartIcon}</button>
-          <button class="btn-order" data-id="${product.id}">Commander</button>
+          <button class="btn-add-cart" data-id="${product.id}">Ajouter au panier</button>
         </div>
       </div>
     </div>
@@ -87,7 +321,7 @@ function createCard(product) {
 // ════════════════════════════════════════
 
 // Render products array to the gallery grid
-function renderProducts(productsArray) {
+async function renderProducts(productsArray) {
   const grid = document.getElementById('galleryGrid');
   grid.innerHTML = '';
   
@@ -104,10 +338,10 @@ function renderProducts(productsArray) {
   
   const fragment = document.createDocumentFragment();
   
-  productsArray.forEach(product => {
-    const card = createCard(product);
+  for (const product of productsArray) {
+    const card = await createCard(product);
     fragment.appendChild(card);
-  });
+  }
   
   grid.appendChild(fragment);
 }
@@ -157,7 +391,7 @@ function renderTasteFilters(category) {
 }
 
 // Apply category filter and re-render products
-function applyFilter(category) {
+async function applyFilter(category) {
   activeFilter = category;
   
   const buttons = document.querySelectorAll('.filter-btn');
@@ -173,11 +407,11 @@ function applyFilter(category) {
   renderTasteFilters(category);
   
   // Apply both filters
-  applyBothFilters();
+  await applyBothFilters();
 }
 
 // Apply taste filter
-function applyTasteFilter(taste) {
+async function applyTasteFilter(taste) {
   activeTaste = taste;
   
   const buttons = document.querySelectorAll('.taste-btn');
@@ -189,11 +423,11 @@ function applyTasteFilter(taste) {
     }
   });
   
-  applyBothFilters();
+  await applyBothFilters();
 }
 
 // Apply both category and taste filters
-function applyBothFilters() {
+async function applyBothFilters() {
   let filtered = allProducts;
   
   // Filter by category
@@ -206,23 +440,7 @@ function applyBothFilters() {
     filtered = filtered.filter(p => p.taste === activeTaste);
   }
   
-  renderProducts(filtered);
-}
-
-// ════════════════════════════════════════
-// MODAL MANAGEMENT
-// ════════════════════════════════════════
-
-// Open the contact modal
-function openModal() {
-  const overlay = document.getElementById('modalOverlay');
-  overlay.classList.add('open');
-}
-
-// Close the contact modal
-function closeModal() {
-  const overlay = document.getElementById('modalOverlay');
-  overlay.classList.remove('open');
+  await renderProducts(filtered);
 }
 
 // ════════════════════════════════════════
@@ -240,10 +458,9 @@ async function loadProducts() {
     
     const data = await response.json();
     allProducts = data;
-    applyFilter('All');
+    await applyFilter('All');
     
   } catch (error) {
-    console.error('Error fetching products:', error);
     const grid = document.getElementById('galleryGrid');
     grid.innerHTML = `
       <div class="error-message">
@@ -273,7 +490,7 @@ async function loadSpecials() {
     renderSpecials(specials);
     
   } catch (error) {
-    console.error('Error fetching specials:', error);
+    const container = document.getElementById('specialsContent');
     container.innerHTML = `
       <p style="color: rgba(255,255,255,0.9); font-weight: 600;">
         <span style="font-size: 1.2rem; margin-right: 0.3rem;">&#9888;</span>
@@ -306,11 +523,10 @@ function renderSpecials(specials) {
 }
 
 // ════════════════════════════════════════
-// AJAX (XMLHttpRequest) — demonstrates classic async HTTP
-// alongside the Fetch API used in loadProducts()
+// AJAX (XMLHttpRequest)
 // ════════════════════════════════════════
 
-// Submit contact form using XMLHttpRequest (classic AJAX)
+// Submit contact form using XMLHttpRequest
 function submitFormAJAX(payload) {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
@@ -354,16 +570,16 @@ function initEventListeners() {
     }
   });
   
-  // Gallery grid - delegated event listeners for favorite and order buttons
+  // Gallery grid - delegated event listeners for favorite and add to cart buttons
   const grid = document.getElementById('galleryGrid');
-  grid.addEventListener('click', (e) => {
+  grid.addEventListener('click', async (e) => {
     // Favorite button
     if (e.target.classList.contains('btn-favorite')) {
       const id = parseInt(e.target.getAttribute('data-id'));
-      const nowFavorited = !isFavorited(id);
-      toggleFavorite(id);
+      await toggleFavorite(id);
+      const isFav = await isFavorited(id);
       
-      if (nowFavorited) {
+      if (isFav) {
         e.target.classList.add('favorited');
         e.target.textContent = '♥';
       } else {
@@ -372,90 +588,177 @@ function initEventListeners() {
       }
     }
     
-    // Order button
-    if (e.target.classList.contains('btn-order')) {
-      openModal();
+    // Add to cart button
+    if (e.target.classList.contains('btn-add-cart')) {
+      const productId = parseInt(e.target.getAttribute('data-id'));
+      const product = allProducts.find(p => p.id === productId);
+      if (product) {
+        addToCart(productId, product.name, product.price);
+        alert(`${product.name} ajouté au panier!`);
+      }
     }
   });
   
-  // Modal open buttons
-  document.getElementById('navContactBtn').addEventListener('click', openModal);
-  document.getElementById('heroContactBtn').addEventListener('click', openModal);
-  document.getElementById('footerContactBtn').addEventListener('click', openModal);
+  // Contact modal buttons
+  const navContactBtn = document.getElementById('navContactBtn');
+  if (navContactBtn) navContactBtn.addEventListener('click', openContactModal);
   
-  // Modal close button
-  document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+  const heroContactBtn = document.getElementById('heroContactBtn');
+  if (heroContactBtn) heroContactBtn.addEventListener('click', openContactModal);
   
-  // Close modal on overlay click
+  const footerContactBtn = document.getElementById('footerContactBtn');
+  if (footerContactBtn) footerContactBtn.addEventListener('click', openContactModal);
+  
+  const modalCloseBtn = document.getElementById('modalCloseBtn');
+  if (modalCloseBtn) modalCloseBtn.addEventListener('click', closeContactModal);
+  
+  // Cart badge - open cart modal
+  document.getElementById('cartCount').parentElement.addEventListener('click', openCartModal);
+  
+  // Cart modal close button
+  document.getElementById('cartModalCloseBtn').addEventListener('click', closeCartModal);
+  
+  // Proceed to order button
+  document.getElementById('proceedOrderBtn').addEventListener('click', openOrderFormModal);
+  
+  // Order form modal close button
+  document.getElementById('orderFormModalCloseBtn').addEventListener('click', closeOrderFormModal);
+  
+  // Close modals on overlay click
   document.getElementById('modalOverlay').addEventListener('click', (e) => {
-    if (e.target.id === 'modalOverlay') {
-      closeModal();
-    }
+    if (e.target.id === 'modalOverlay') closeContactModal();
   });
   
-  // Close modal on Escape key
+  document.getElementById('cartModalOverlay').addEventListener('click', (e) => {
+    if (e.target.id === 'cartModalOverlay') closeCartModal();
+  });
+  
+  document.getElementById('orderFormModalOverlay').addEventListener('click', (e) => {
+    if (e.target.id === 'orderFormModalOverlay') closeOrderFormModal();
+  });
+  
+  // Close modals on Escape key
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
-      closeModal();
+      closeContactModal();
+      closeCartModal();
+      closeOrderFormModal();
     }
   });
   
-  // Contact form submission using AJAX (XMLHttpRequest)
-  const form = document.getElementById('contactForm');
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const name = document.getElementById('formName').value.trim();
-    const email = document.getElementById('formEmail').value.trim();
-    const message = document.getElementById('formMessage').value.trim();
-    
-    if (!name || !email || !message) {
-      alert('Veuillez remplir tous les champs');
-      return;
-    }
-    
-    const submitBtn = form.querySelector('.btn-submit');
-    const originalText = submitBtn.textContent;
-    const successMsg = document.getElementById('successMessage');
-    const errorMsg = document.getElementById('errorMessage');
-    
-    // Show sending state
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Envoi en cours…';
-    errorMsg.classList.remove('show');
-    
-    const payload = {
-      name,
-      email,
-      message,
-      timestamp: new Date().toISOString()
-    };
-    
-    try {
-      const response = await submitFormAJAX(payload);
-      console.log('AJAX response:', response);
+  // Contact form submission
+  const contactForm = document.getElementById('contactForm');
+  if (contactForm) {
+    contactForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
       
-      // Show success message
-      successMsg.classList.add('show');
-      form.reset();
+      const name = document.getElementById('formName').value.trim();
+      const email = document.getElementById('formEmail').value.trim();
+      const message = document.getElementById('formMessage').value.trim();
       
-      setTimeout(() => {
-        successMsg.classList.remove('show');
-        closeModal();
+      if (!name || !email || !message) {
+        alert('Veuillez remplir tous les champs');
+        return;
+      }
+      
+      const submitBtn = contactForm.querySelector('.btn-submit');
+      const originalText = submitBtn.textContent;
+      const successMsg = document.getElementById('successMessage');
+      const errorMsg = document.getElementById('errorMessage');
+      
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Envoi en cours…';
+      errorMsg.classList.remove('show');
+      
+      const payload = {
+        name,
+        email,
+        message,
+        timestamp: new Date().toISOString()
+      };
+      
+      try {
+        await submitFormAJAX(payload);
+        successMsg.classList.add('show');
+        contactForm.reset();
+        
+        setTimeout(() => {
+          successMsg.classList.remove('show');
+          closeContactModal();
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalText;
+        }, 2500);
+        
+      } catch (error) {
+        errorMsg.innerHTML = `<span style="font-size: 1.2rem; margin-right: 0.3rem;">&#10060;</span> Erreur: ${error.message}`;
         submitBtn.disabled = false;
         submitBtn.textContent = originalText;
-      }, 2500);
+      }
+    });
+  }
+  
+  // Order form submission
+  const orderForm = document.getElementById('orderForm');
+  if (orderForm) {
+    orderForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
       
-    } catch (error) {
-      console.error('AJAX error:', error);
+      const firstname = document.getElementById('orderFirstname').value.trim();
+      const lastname = document.getElementById('orderLastname').value.trim();
+      const date = document.getElementById('orderDate').value;
+      const phone = document.getElementById('orderPhone').value.trim();
       
-      // Show error message
-      errorMsg.innerHTML = `<span style="font-size: 1.2rem; margin-right: 0.3rem;">&#10060;</span> Erreur: ${error.message}`;
-      errorMsg.classList.add('show');
-      submitBtn.disabled = false;
-      submitBtn.textContent = originalText;
-    }
-  });
+      // Validation
+      if (!firstname || !lastname || !date || !phone) {
+        alert('Veuillez remplir tous les champs');
+        return;
+      }
+      
+      if (getCartItems().length === 0) {
+        alert('Votre panier est vide');
+        return;
+      }
+      
+      const submitBtn = orderForm.querySelector('.btn-submit');
+      const originalText = submitBtn.textContent;
+      const successMsg = document.getElementById('orderSuccessMessage');
+      const errorMsg = document.getElementById('orderErrorMessage');
+      
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Confirmation en cours…';
+      errorMsg.classList.remove('show');
+      
+      const orderData = {
+        firstname,
+        lastname,
+        date,
+        phone,
+        items: getCartItems(),
+        total: getCartTotal(),
+        timestamp: new Date().toISOString()
+      };
+      
+      try {
+        await submitFormAJAX(orderData);
+        successMsg.classList.add('show');
+        orderForm.reset();
+        clearCart();
+        
+        setTimeout(() => {
+          successMsg.classList.remove('show');
+          closeOrderFormModal();
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalText;
+        }, 3000);
+        
+      } catch (error) {
+        errorMsg.innerHTML = `<span style="font-size: 1.2rem; margin-right: 0.3rem;">&#10060;</span> Erreur: ${error.message}`;
+        errorMsg.classList.add('show');
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+      }
+    });
+  }
 }
 
 // ════════════════════════════════════════
@@ -463,9 +766,15 @@ function initEventListeners() {
 // ════════════════════════════════════════
 
 // Initialize app on DOM ready
-document.addEventListener('DOMContentLoaded', () => {
-  updateFavoritesCounter();
-  initEventListeners();
-  loadProducts();
-  loadSpecials();
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    await initIndexedDB();
+    await updateFavoritesCounter();
+    updateCartCounter();
+    initEventListeners();
+    await loadProducts();
+    await loadSpecials();
+  } catch (error) {
+    // Initialization failed silently
+  }
 });

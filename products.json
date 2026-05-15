@@ -1,110 +1,74 @@
 [
   {
     "id": 1,
-    "name": "Baklawa",
-    "price": 12.50,
+    "name": "cookies",
+    "price": 10,
     "category": "Sucré",
-    "taste": "Miel",
+    "taste": "Chcolat",
     "image_url": "image/cookies.png",
-    "description": "Pâte feuilletée aux amandes et miel parfumé"
+    "description": "un biscuit gourmand moelleuse au centre et croustillante sur les bords"
   },
   {
     "id": 2,
     "name": "Brownies",
     "price": 8.00,
     "category": "Sucré",
-    "taste": "Dattes",
+    "taste": "Chcolat",
     "image_url": "image/brownies.png",
-    "description": "Semoule farcie aux dattes et miel"
+    "description": "gâteau au chocolat fondant"
   },
   {
     "id": 3,
-    "name": "Zlabia",
+    "name": "Sablé",
     "price": 10.00,
     "category": "Sucré",
-    "taste": "Miel",
-    "image_url": "https://picsum.photos/seed/zlabia/600/400",
-    "description": "Pâte frite en spirale trempée dans le miel"
+    "taste": "vanille",
+    "image_url": "image/Sablé.png",
+    "description": "petit biscuit riche beurre"
   },
   {
     "id": 4,
-    "name": "Kaak Warka",
+    "name": "tarte amandine",
     "price": 15.00,
     "category": "Sucré",
     "taste": "Amandes",
-    "image_url": "https://picsum.photos/seed/kaak-warka/600/400",
+    "image_url": "image/tarte.png",
     "description": "Gâteau aux amandes et fleur d'oranger"
   },
   {
     "id": 5,
-    "name": "Brik à l'Œuf",
-    "price": 18.00,
+    "name": "Mini pizza",
+    "price": 12.00,
     "category": "Salé",
     "taste": "Thon",
-    "image_url": "https://picsum.photos/seed/brik/600/400",
-    "description": "Feuille de brick croustillante avec œuf et thon"
+    "image_url": "image/pizza.png",
+    "description": "Mini pizza thon"
   },
   {
     "id": 6,
     "name": "Fricassé",
-    "price": 14.00,
+    "price": 4.00,
     "category": "Salé",
     "taste": "Épicé",
-    "image_url": "https://picsum.photos/seed/fricasse/600/400",
+    "image_url": "image/Fricassé.png",
     "description": "Pain frit garni de thon, harissa et olives"
   },
   {
     "id": 7,
-    "name": "Samsa",
+    "name": "Brik Danouni",
     "price": 12.00,
     "category": "Salé",
-    "taste": "Thon",
-    "image_url": "https://picsum.photos/seed/samsa/600/400",
-    "description": "Chausson feuilleté au thon et câpres"
+    "taste": "Viande hachée",
+    "image_url": "image/brik.png",
+    "description": "Brik traditionnel tunisien"
   },
   {
     "id": 8,
-    "name": "Tajine Malsouka",
-    "price": 16.00,
+    "name": "Batbout",
+    "price": 8.00,
     "category": "Salé",
     "taste": "Poulet",
-    "image_url": "https://picsum.photos/seed/tajine/600/400",
-    "description": "Feuilles de malsouka farcies au poulet"
-  },
-  {
-    "id": 9,
-    "name": "Gâteau aux Dattes",
-    "price": 22.00,
-    "category": "Gâteau",
-    "taste": "Dattes",
-    "image_url": "https://picsum.photos/seed/date-cake/600/400",
-    "description": "Gâteau moelleux aux dattes et noix"
-  },
-  {
-    "id": 10,
-    "name": "Basbousa",
-    "price": 20.00,
-    "category": "Gâteau",
-    "taste": "Amandes",
-    "image_url": "https://picsum.photos/seed/basbousa/600/400",
-    "description": "Gâteau de semoule au sirop et amandes"
-  },
-  {
-    "id": 11,
-    "name": "Kalb el Louz",
-    "price": 24.00,
-    "category": "Gâteau",
-    "taste": "Amandes",
-    "image_url": "https://picsum.photos/seed/kalb-louz/600/400",
-    "description": "Gâteau aux amandes et fleur d'oranger"
-  },
-  {
-    "id": 12,
-    "name": "Yo-Yo",
-    "price": 18.00,
-    "category": "Gâteau",
-    "taste": "Confiture",
-    "image_url": "https://picsum.photos/seed/yoyo/600/400",
-    "description": "Biscuits fourrés à la confiture et noix de coco"
+    "image_url": "image/batbout.png",
+    "description": "un pain marocain traditionnel"
   }
 ]
